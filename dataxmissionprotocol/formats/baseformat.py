@@ -28,7 +28,7 @@ class BaseFormat:
       return (len(buf) - offset) >= self._minPacketSize
    
    def readField(self, buf, offset, field):
-      pass
+      field._read(buf, offset, BaseFormat.__byteorder[self.__byteorder])
    
    def writeField(self, buf, offset, field):
-      pass
+      field._write(buf, offset, BaseFormat.__byteorder[self.__byteorder])

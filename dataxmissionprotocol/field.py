@@ -8,8 +8,8 @@ class Field:
    
    [{value.append(value[0].lower()) for value in __formats.values()}]
    
-   def __init__(self, size, signed = None):
-      self.__offset = 0
+   def __init__(self, size, signed = None, precedingField = None):
+      self.__offset = 0 if precedingField == None else precedingField.nextOffset
       self.__size = size
       self.__format = None if signed == None else Field.__formats[size][+signed]
       self.__value = None
@@ -27,9 +27,19 @@ class Field:
       return self.__size
    
    @property
+   def nextOffset(self):
+      return self.__offset + self.__size
+   
+   @property
    def value(self):
       return self.__value
    
    @value.setter
    def value(self, value):
       self.__value = value
+   
+   def __read(self, buf, offset, byteorder):
+      pass
+   
+   def _write(self, buf, offset, byteorder):
+      pass
