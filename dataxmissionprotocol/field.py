@@ -15,7 +15,7 @@ class Field:
       self._offset = 0 if "previousField" not in kwargs else kwargs["previousField"].nextOffset
       self.__size = size
       self.__format = None if "signed" not in kwargs else Field.__formats[size][+kwargs["signed"]]
-      self.value = kwargs.get("value")
+      self.__value = kwargs.get("value")
    
    @property
    def size(self):
@@ -31,10 +31,14 @@ class Field:
    
    @value.setter
    def value(self, value):
-      if self.__format == None and len(value) != self.__size:
+      if self.__format != None:
+         self.__value = value
+      
+      elif len(value) != self.__size:
          raise ValueError()
       
-      self.__value = value
+      else:
+         self.__value = value[:]
    
    def _get(self, buf, offset, byteorder):
       i = offset + self._offset

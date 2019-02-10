@@ -27,7 +27,10 @@ class Packet:
       
       return self
    
-   def setParam(param, finalize = False):
+   def getParam(self, param):
+      return self.__format.getParam(self.__buf, param)
+   
+   def setParam(self, param, finalize = False):
       self.__format.setParam(self.__buf, param, finalize)
    
    @property
