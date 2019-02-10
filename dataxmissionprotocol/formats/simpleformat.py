@@ -5,6 +5,7 @@ class SimpleFormat(BaseFormat):
       super().__init__()
       
       if marker.size > 1:
+         # see self.getPacketStartIndex() implementation.
          raise NotImplementedError()
       
       self._minPacketSize = marker.size + size.size + cmd.size + crc.size
@@ -12,8 +13,60 @@ class SimpleFormat(BaseFormat):
       self.__marker = marker
       self.__size = size
       self.__cmd = cmd
-      self.__paramsOffset = cmd.nextOffset
+      self._paramsOffset = cmd.nextOffset
       self.__crc = crc
    
    def hasEnoughBytes(self, buf, offset):
-      return super().hasEnoughBytes(buf, offset) and remaining >= self.getPacketSize(buf, offset)
+      return super().hasEnoughBytes(buf, offset) and (len(buf) - offset) >= self.getPacketSize(buf, offset)
+   
+   def getPacketStartIndex(self, buf, offset):
+      return buf.index(self.__marker.value, offset)
+   
+   def getPacketSize(self, buf, offset = 0):
+      return self._getField(buf, offset, self.__size).value
+   
+   def getCommandNumber(self, buf, offset = 0):
+      return self._getField(buf, offset, self.__cmd).value
+   
+   def getParam(self, buf, param):
+      return self._getField(buf, self._paramsOffset, param)
+   
+   def isValid(self, buf):
+      if len(buf) < self.minPacketSize or self._getField(buf, 0, self.__marker).value != self.__marker.value:
+         return False
+      
+      packetSize = self.getPacketSize(buf)
+      self.__crc._offset = packetSize - self.__crc.size
+      
+      return packetSize >= self.minPacketSize   \
+         and len(buf) == packetSize             \
+         and self._getField(buf, 0, self.__crc).value == self._calcCrc(buf)
+   
+   def setCommandNumber(self, buf, commandNumber):
+      self.__cmd.value = commandNumber
+      
+      self._setField(buf, 0, self.__cmd)
+   
+   def setParam(self, buf, param, finalize = False):
+      self._setField(buf, self._paramsOffset, param)
+      
+      if finalize:
+         self.finalizePacket(buf)
+   
+   def finalizePacket(self, buf):
+      self._setField(buf, 0, self.__marker)
+      
+      self.__size.value = len(buf)
+      self._setField(buf, 0, self.__size)
+      
+      self.__crc._offset = self.__size.value - self.__crc.size
+      self.__crc.value = self._calcCrc(buf)
+      self._setField(buf, 0, self.__crc)
+   
+   def _calcCrc(self, buf):
+      crc = 0
+      
+      for i in range(self.__size._offset, len(buf) - self.__crc.size):
+         crc += buf[i]
+      
+      return crc

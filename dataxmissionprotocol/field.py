@@ -1,3 +1,5 @@
+from struct import pack_into, unpack_from
+
 class Field:
    __formats = {
       1: ["B"],
@@ -6,21 +8,14 @@ class Field:
       8: ["Q"]
    }
    
-   [{value.append(value[0].lower()) for value in __formats.values()}]
+   for value in __formats.values():
+      value.append(value[0].lower())
    
-   def __init__(self, size, signed = None, precedingField = None):
-      self.__offset = 0 if precedingField == None else precedingField.nextOffset
+   def __init__(self, size, **kwargs):
+      self._offset = 0 if "previousField" not in kwargs else kwargs["previousField"].nextOffset
       self.__size = size
-      self.__format = None if signed == None else Field.__formats[size][+signed]
-      self.__value = None
-   
-   @property
-   def offset(self):
-      return self.__offset
-   
-   @offset.setter
-   def offset(self, offset):
-      self.__offset = offset
+      self.__format = None if "signed" not in kwargs else Field.__formats[size][+kwargs["signed"]]
+      self.value = kwargs.get("value")
    
    @property
    def size(self):
@@ -28,7 +23,7 @@ class Field:
    
    @property
    def nextOffset(self):
-      return self.__offset + self.__size
+      return self._offset + self.__size
    
    @property
    def value(self):
@@ -36,10 +31,25 @@ class Field:
    
    @value.setter
    def value(self, value):
+      if self.__format == None and len(value) != self.__size:
+         raise ValueError()
+      
       self.__value = value
    
-   def __read(self, buf, offset, byteorder):
-      pass
+   def _get(self, buf, offset, byteorder):
+      i = offset + self._offset
+      j = i + self.__size
+      
+      self.__value = buf[i:j] if self.__format == None else unpack_from(f"{byteorder}{self.__format}", buf, i)[0]
+      
+      return self
    
-   def _write(self, buf, offset, byteorder):
-      pass
+   def _set(self, buf, offset, byteorder):
+      i = offset + self._offset
+      j = i + self.__size
+      
+      if self.__format == None:
+         buf[i:j] = self.__value
+      
+      else:
+         pack_into(f"{byteorder}{self.__format}", buf, i, self.__value)
