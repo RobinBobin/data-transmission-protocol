@@ -4,16 +4,17 @@ class Packet:
       
       if "cmd" in kwargs:
          sizeSpecified = "size" in kwargs
+         paramsSpecified = "params" in kwargs
          
-         if sizeSpecified == ("params" in kwargs):
-            raise ValueError("Either 'params' or 'size' must be specified.")
+         if sizeSpecified and paramsSpecified:
+            raise ValueError("Either 'params' or 'size' can be specified.")
          
          self.__buf = bytearray([0] * format.minPacketSize)
          
          if sizeSpecified:
             self.__buf.extend(bytearray([0] * kwargs["size"]))
          
-         else:
+         elif paramsSpecified:
             self.__buf[format._paramsOffset : format._paramsOffset] = kwargs["params"]
          
          format.setCommandNumber(self.__buf, kwargs["cmd"])
