@@ -16,11 +16,11 @@ class SimpleFormat(BaseFormat):
       self._paramsOffset = cmd.nextOffset
       self.__crc = crc
    
-   def hasEnoughBytes(self, buf, offset):
-      return super().hasEnoughBytes(buf, offset) and (len(buf) - offset) >= self.getPacketSize(buf, offset)
-   
    def getPacketStartIndex(self, buf, offset):
       return buf.index(self.__marker.value, offset)
+   
+   def hasEnoughBytes(self, buf, offset):
+      return super().hasEnoughBytes(buf, offset) and (len(buf) - offset) >= self.getPacketSize(buf, offset)
    
    def getPacketSize(self, buf, offset = 0):
       return self._getField(buf, offset, self.__size).value

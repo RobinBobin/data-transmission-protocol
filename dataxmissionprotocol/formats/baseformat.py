@@ -24,8 +24,17 @@ class BaseFormat:
    def minPacketSize(self):
       return self._minPacketSize
    
+   def getPacketStartIndex(self, buf, offset):
+      raise NotImplementedError()
+   
    def hasEnoughBytes(self, buf, offset):
       return (len(buf) - offset) >= self._minPacketSize
+   
+   def getPacketSize(self, buf, offset = 0):
+      raise NotImplementedError()
+   
+   def getCommandNumber(self, buf, offset = 0):
+      raise NotImplementedError()
    
    def _getField(self, buf, offset, field):
       return field._get(buf, offset, BaseFormat.__byteorder[self.__byteorder])
