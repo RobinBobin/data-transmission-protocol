@@ -1,1 +1,3 @@
-pip3 install --no-cache-dir --index-url https://test.pypi.org/simple dataxmissionprotocol
+# --index-url https://test.pypi.org/simple
+
+pip3 install --no-cache-dir dataxmissionprotocol
