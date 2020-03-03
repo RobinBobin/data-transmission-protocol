@@ -12,7 +12,9 @@ class Field:
       value.append(value[0].lower())
    
    def __init__(self, size, **kwargs):
-      self._offset = 0 if "previousField" not in kwargs else kwargs["previousField"].nextOffset
+      previousField = None if "previousField" not in kwargs else kwargs["previousField"]
+      
+      self._offset = previousField.nextOffset if previousField else 0
       self.__size = size
       self.__format = None if "signed" not in kwargs else Field.__formats[size][+kwargs["signed"]]
       self.__value = kwargs.get("value")

@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
    name="dataxmissionprotocol",
-   version="0.1.0",
+   version="1.0.0",
    author="Ruben Shalimov",
    author_email="r_shalimov@inbox.ru",
    description="Data transmission protocol package",
