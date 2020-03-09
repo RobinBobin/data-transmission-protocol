@@ -1,3 +1,5 @@
+from .field import Field
+
 class Packet:
    def __init__(self, format, **kwargs):
       self.__format = format
@@ -33,6 +35,26 @@ class Packet:
    
    def setParam(self, param, finalize = False):
       self.__format.setParam(self.__buf, param, finalize)
+   
+   def setParams(self, values, signed, size):
+      def getValue(var, index):
+         try:
+            return var[index]
+         
+         except TypeError:
+            return var
+      
+      field = None
+      count = len(values)
+      
+      for index in range(count):
+         field = Field(
+            getValue(size, index),
+            previousField = field,
+            signed = getValue(signed, index),
+            value = values[index])
+         
+         self.setParam(field, index == (count - 1))
    
    @property
    def rawBuffer(self):
