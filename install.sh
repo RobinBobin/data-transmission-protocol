@@ -1,3 +1,1 @@
-# --index-url https://test.pypi.org/simple
-
-pip3 install --no-cache-dir dataxmissionprotocol
+git commit && git push && ./make.sh && pip install .

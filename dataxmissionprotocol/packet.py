@@ -37,24 +37,10 @@ class Packet:
       self.__format.setParam(self.__buf, param, finalize)
    
    def setParams(self, values, signed, size):
-      def getValue(var, index):
-         try:
-            return var[index]
-         
-         except TypeError:
-            return var
+      fields = Field.createChain(size, signed, values)
       
-      field = None
-      count = len(values)
-      
-      for index in range(count):
-         field = Field(
-            getValue(size, index),
-            previousField = field,
-            signed = getValue(signed, index),
-            value = values[index])
-         
-         self.setParam(field, index == (count - 1))
+      for index, field in enumerate(fields):
+         self.setParam(field, index == (len(fields) - 1))
    
    @property
    def rawBuffer(self):

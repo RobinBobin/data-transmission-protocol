@@ -1,3 +1,4 @@
+from commonutils import StaticUtils
 from struct import pack_into, unpack_from
 
 class Field:
@@ -8,15 +9,16 @@ class Field:
       8: ["Q"]
    }
    
-   for value in __formats.values():
-      value.append(value[0].lower())
+   for v in __formats.values():
+      v.append(v[0].lower())
    
    def __init__(self, size, **kwargs):
-      previousField = None if "previousField" not in kwargs else kwargs["previousField"]
+      previousField = kwargs.get("previousField")
+      signed = kwargs.get("signed")
       
       self._offset = previousField.nextOffset if previousField else 0
       self.__size = size
-      self.__format = None if "signed" not in kwargs else Field.__formats[size][+kwargs["signed"]]
+      self.__format = None if signed == None else Field.__formats[size][+signed]
       self.__value = kwargs.get("value")
    
    @property
@@ -41,6 +43,29 @@ class Field:
       
       else:
          self.__value = value[:]
+   
+   @staticmethod
+   def createChain(size, signed = None, value = None):
+      chain = []
+      args = (size, signed, value)
+      
+      def count():
+         for x in args:
+            if StaticUtils.isIterable(x):
+               return len(x)
+         
+         raise ValueError()
+      
+      for index in range(count()):
+         params = tuple(v[index] if StaticUtils.isIterable(v) else v for v in args)
+         
+         chain.append(Field(
+            params[0],
+            previousField = chain[index - 1] if index else None,
+            signed = params[1],
+            value = params[2]))
+      
+      return chain
    
    def _get(self, buf, offset, byteorder):
       i = offset + self._offset
