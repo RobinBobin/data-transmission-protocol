@@ -36,7 +36,7 @@ class SimpleFormat(BaseFormat):
          return False
       
       packetSize = self.getPacketSize(buf)
-      self.__crc._offset = packetSize - self.__crc.size
+      self.__crc.offset = packetSize - self.__crc.size
       
       return packetSize >= self.minPacketSize   \
          and len(buf) == packetSize             \
@@ -59,14 +59,14 @@ class SimpleFormat(BaseFormat):
       self.__size.value = len(buf)
       self._setField(buf, 0, self.__size)
       
-      self.__crc._offset = self.__size.value - self.__crc.size
+      self.__crc.offset = self.__size.value - self.__crc.size
       self.__crc.value = self._calcCrc(buf)
       self._setField(buf, 0, self.__crc)
    
    def _calcCrc(self, buf):
       crc = 0
       
-      for i in range(self.__size._offset, len(buf) - self.__crc.size):
+      for i in range(self.__size.offset, len(buf) - self.__crc.size):
          crc += buf[i]
       
       return crc

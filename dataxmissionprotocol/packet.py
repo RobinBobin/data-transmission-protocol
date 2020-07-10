@@ -23,6 +23,9 @@ class Packet:
          format.finalizePacket(self.__buf)
    
    def wrap(self, buffer, **kwargs):
+      if not isinstance(buffer, bytearray):
+         buffer = bytearray(buffer)
+      
       self.__buf = buffer[kwargs.get("start", 0):kwargs.get("end", len(buffer))]
 
       if not self.__format.isValid(self.__buf):
@@ -36,11 +39,15 @@ class Packet:
    def setParam(self, param, finalize = False):
       self.__format.setParam(self.__buf, param, finalize)
    
-   def setParams(self, values, signed, size):
-      fields = Field.createChain(size, signed, values)
+   def setParams(self, values = None, signed = None, size = None, fields = None):
+      fields = Field.createChain(size, signed, values, fields)
       
       for index, field in enumerate(fields):
          self.setParam(field, index == (len(fields) - 1))
+   
+   @property
+   def size(self):
+      return self.__format.getPacketSize(self.__buf) - self.__format.minPacketSize
    
    @property
    def rawBuffer(self):
