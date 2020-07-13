@@ -102,7 +102,7 @@ class Field:
          self.__value = buf[i:j]
       
       else:
-         isStr = isinstance(self.__format[0], int)
+         isStr = self.__format[0].isdigit()
          
          if len(self.__format) != 2 or isStr:
             self.__value = unpack_from(f"{byteorder}{self.__format}", buf, i)[0]
@@ -131,7 +131,7 @@ class Field:
       if self.__format == None:
          buf[i:j] = self.__value
       
-      elif len(self.__format) != 2 or isinstance(self.__format[0], int):
+      elif len(self.__format) != 2 or self.__format[0].isdigit():
          pack_into(f"{byteorder}{self.__format}", buf, i, self.__value)
       
       else:
