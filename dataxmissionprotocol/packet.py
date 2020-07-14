@@ -1,25 +1,35 @@
+from functools import reduce
 from .field import Field
 
 class Packet:
-   def __init__(self, format, **kwargs):
+   def __init__(self, format, **kw):
       self.__format = format
       
-      if "cmd" in kwargs:
-         sizeSpecified = "size" in kwargs
-         paramsSpecified = "params" in kwargs
+      # = "cmd" can be missing, if we want to wrap() = #
+      if "cmd" in kw:
+         d = {key: key in kw for key in ("size", "params", "fields")}
+         sizeSpecified, paramsSpecified, fieldsSpecified = d.values()
          
-         if sizeSpecified and paramsSpecified:
-            raise ValueError("Either 'params' or 'size' can be specified.")
+         if list(d.values()).count(True) > 1:
+            raise ValueError(f"Only one of {list(d.keys())} can be specified")
          
          self.__buf = bytearray([0] * format.minPacketSize)
          
+         def extendBuf(size):
+            self.__buf.extend(bytearray([0] * size))
+         
          if sizeSpecified:
-            self.__buf.extend(bytearray([0] * kwargs["size"]))
+            extendBuf(kw["size"])
          
          elif paramsSpecified:
-            self.__buf[format._paramsOffset : format._paramsOffset] = kwargs["params"]
+            self.__buf[format._paramsOffset : format._paramsOffset] = kw["params"]
          
-         format.setCommandNumber(self.__buf, kwargs["cmd"])
+         elif fieldsSpecified:
+            fields = kw["fields"]
+            extendBuf(reduce(lambda x, y: x + y, map(lambda f: f.size, fields)))
+            self.setParams(fields = fields)
+         
+         format.setCommandNumber(self.__buf, kw["cmd"])
          format.finalizePacket(self.__buf)
    
    def wrap(self, buffer, **kwargs):
