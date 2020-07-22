@@ -94,6 +94,10 @@ class Field:
       
       return chain
    
+   @staticmethod
+   def setEncoding(encoding):
+      Field.__encoding = encoding
+   
    def _get(self, buf, offset, byteorder):
       i = offset + self.__offset
       j = i + self.__size
