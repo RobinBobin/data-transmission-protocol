@@ -26,7 +26,7 @@ class Parser:
       return self
    
    def parse(self, data):
-      packets = []
+      packets = None if self.__defaultHandler else []
       
       self.__buf.extend(data)
       
@@ -54,9 +54,11 @@ class Parser:
             offset += 1
          
          else:
-            if handler and handler.handler:
-               handler.handler(packet)
-               
+            h = handler.handler if handler and handler.handler else self.__defaultHandler
+            
+            if h:
+               h(packet)
+            
             else:
                packets.append(packet)
             
@@ -65,3 +67,8 @@ class Parser:
       del self.__buf[0:offset]
       
       return packets
+   
+   def setDefaultHandler(self, handler):
+      self.__defaultHandler = handler
+      
+      return self
