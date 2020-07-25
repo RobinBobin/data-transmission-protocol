@@ -32,6 +32,9 @@ class Packet:
          format.setCommandNumber(self.__buf, kw["cmd"])
          format.finalizePacket(self.__buf)
    
+   def __str__(self):
+      return f"<{self.__class__.__name__}, {list(self.rawBuffer)}>"
+   
    def wrap(self, buffer, **kwargs):
       if not isinstance(buffer, bytearray):
          buffer = bytearray(buffer)
