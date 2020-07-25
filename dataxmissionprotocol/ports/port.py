@@ -110,7 +110,7 @@ class Port:
       
       try:
          if self.__debugWrite:
-            print(list(packet.rawBuffer))
+            print(packet)
          
          else:
             if not self.isOpen():

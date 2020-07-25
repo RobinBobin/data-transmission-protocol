@@ -16,9 +16,10 @@ class Parser:
    
    def __init__(self, format, defaultPacketType = Packet):
       self.__buf = bytearray()
-      self.__handlers = {}
-      self.__format = format
+      self.__defaultHandler = None
       self.__defaultPacketType = defaultPacketType
+      self.__format = format
+      self.__handlers = {}
    
    @property
    def format(self):
