@@ -20,6 +20,10 @@ class Parser:
       self.__format = format
       self.__defaultPacketType = defaultPacketType
    
+   @property
+   def format(self):
+      return self.__format
+   
    def addHandler(self, handler):
       self.__handlers[handler.packetType.CMD] = handler
       

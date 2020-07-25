@@ -6,26 +6,24 @@ from .. import Port
 
 class Serial(Port):
    def __init__(self, parser, protocolFactory = Protocol):
-      super().__init__(parser)
+      super().__init__(parser, portNotOpenError, SerialException)
       
       self.__protocolFactory = protocolFactory
       self.__thread = None
    
-   def close(self):
+   def isOpen(self):
+      return self.__thread and self.__thread.serial.is_open
+   
+   def _close(self):
       if self.__thread:
          self.__thread.close()
          self.__thread = None
    
-   def open(self, path, **kw):
-      self.close()
+   def _open(self, path, **kw):
+      self.__thread = ReaderThread(self, serial_for_url(path, **kw), self.__protocolFactory)
       
-      try:
-         self.__thread = ReaderThread(self, serial_for_url(path, **kw), self.__protocolFactory)
-         
-         self.__thread.start()
-         self.__thread.connect()
-         
-         return True
-      
-      except SerialException as e:
-         self.errorProcessor(e)
+      self.__thread.start()
+      self.__thread.connect()
+   
+   def _write(self, packet):
+      self.__thread.serial.write(packet.rawBuffer)
