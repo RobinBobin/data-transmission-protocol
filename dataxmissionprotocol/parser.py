@@ -1,3 +1,4 @@
+from inspect import signature
 from .packet import Packet
 
 class Parser:
@@ -53,7 +54,11 @@ class Parser:
          handler = self.__handlers.get(self.__format.getCommandNumber(self.__buf, offset))
          
          try:
-            packet = (handler.packetType if handler else self.__defaultPacketType)(self.__format).wrap(self.__buf, start = offset, end = offset + packetSize)
+            packetType = handler.packetType if handler else self.__defaultPacketType
+            
+            parameterCount = len(signature(packetType.__init__).parameters)
+            
+            packet = (packetType() if parameterCount == 2 else packetType(self.__format)).wrap(self.__buf, start = offset, end = offset + packetSize)
          
          except ValueError:
             offset += 1
