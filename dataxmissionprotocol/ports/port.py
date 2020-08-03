@@ -80,6 +80,9 @@ class Port:
    def throw(self, throw):
       self.__throw = throw
    
+   def Packet(self, **kw):
+      return Packet(self.__parser.format, **kw)
+   
    def addConnectionListener(self, connectionListener):
       self.__addRemoveConnectionListener(True, connectionListener)
    
@@ -106,7 +109,7 @@ class Port:
          self.__throw = False
    
    def packet(self, **kw):
-      self.__packet = Packet(self.__parser.format, **kw)
+      self.__packet = self.Packet(**kw)
       
       return self
    
