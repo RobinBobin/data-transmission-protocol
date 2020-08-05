@@ -152,4 +152,8 @@ class Field:
 
 class UnsignedField1(Field):
    def __init__(self, size = None, **kw):
-      super().__init__(size = 1, signed = False, **kw)
+      # = The prototype was invalid, so backward compatibility... = #
+      if "value" not in kw:
+         kw["value"] = size
+      
+      super().__init__(size = 1, signed = False, value = kw["value"])
