@@ -148,3 +148,8 @@ class Field:
             tmpbuf.pop(0 if byteorder == ">" else -1)
          
          buf[i:j] = tmpbuf
+
+
+class UnsignedField1(Field):
+   def __init__(self, size = None, **kw):
+      super().__init__(size = 1, signed = False, **kw)
