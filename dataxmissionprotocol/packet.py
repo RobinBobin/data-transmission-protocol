@@ -59,6 +59,10 @@ class Packet:
          self.setParam(field, index == (len(fields) - 1))
    
    @property
+   def commandNumber(self):
+      return self.__format.getCommandNumber(self.__buf)
+   
+   @property
    def size(self):
       return self.__format.getPacketSize(self.__buf) - self.__format.minPacketSize
    
@@ -67,7 +71,7 @@ class Packet:
       return self.__buf
    
    def _verifyCmdValidity(self, cmd):
-      commandNumber = self.__format.getCommandNumber(self.__buf)
+      commandNumber = self.commandNumber
       
       if commandNumber != cmd:
          raise AssertionError(f"{self.__class__.__name__}: the command number must be {cmd}, not {commandNumber}.")

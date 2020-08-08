@@ -27,7 +27,16 @@ class Parser:
       return self.__format
    
    def addHandler(self, handler):
-      self.__handlers[handler.packetType.CMD] = handler
+      cmd = None
+      
+      if isinstance(handler.packetType, Packet):
+         cmd = handler.packetType.CMD
+      
+      else:
+         cmd = handler.packetType
+         handler = Parser.Handler(self.__defaultPacketType, handler.handler)
+      
+      self.__handlers[cmd] = handler
       
       return self
    
