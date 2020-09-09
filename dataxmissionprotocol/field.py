@@ -19,12 +19,16 @@ class Field:
       v.append(v[0].lower())
    
    def __init__(self, size = None, **kw):
+      offset = kw.get("offset", 0)
       previousField = kw.get("previousField")
       signed = kw.get("signed")
       value = kw.get("value")
       valueIsStr = not size
       
-      self.__offset = previousField.nextOffset if previousField else 0
+      if previousField and "offset" in kw:
+         raise ValueError("Only one of 'previousField' and 'offset' can be specified")
+      
+      self.__offset = previousField.nextOffset if previousField else offset
       self.__size = len(value) if valueIsStr else size
       
       self.__format = f"{self.__size}s" if valueIsStr else None if signed == None else Field.__formats[self.__size][+signed]
