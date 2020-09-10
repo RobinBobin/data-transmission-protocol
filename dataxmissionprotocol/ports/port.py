@@ -133,7 +133,8 @@ class Port:
          self.flushWriteQueue()
    
    def flushWriteQueue(self):
-      self._writeQueue.clear()
+      if self._writeQueue is not None:
+         self._writeQueue.clear()
    
    def isOpen(self):
       StaticUtils.notImplemented()
