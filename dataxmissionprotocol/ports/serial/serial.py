@@ -30,9 +30,6 @@ class Serial(Port):
    def timeout(self, timeout):
       self.__timeout = timeout
    
-   def isOpen(self):
-      return self.__thread and self.__thread.serial.is_open
-   
    def _close(self):
       if self.__thread:
          self.__thread.close()

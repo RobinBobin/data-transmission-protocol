@@ -6,16 +6,7 @@ from .connectionlistener import ConnectionListener
 from .queue import ConnectionEstablished, ConnectionLost, DataReceived, ProcessError
 from .. import Packet
 
-class UnknownItem(ValueError):
-   def __init__(self, item):
-      self.__item = item
-   
-   @property
-   def item(self):
-      return self.__item
-
-
-class Port:
+class Port(ConnectionListener):
    class QueuedPacket:
       class State(IntFlag):
          SENT = 1
@@ -45,10 +36,11 @@ class Port:
       
       self.__PortExceptionType = PortExceptionType or type(portNotOpenException)
       self.__autoOpenOnWrite = False
-      self.__connectionListeners = set()
+      self.__connectionListeners = set((self,))
       self.__debugRead = False
       self.__debugWrite = False
       self.__errorProcessor = print
+      self.__isOpen = False
       self.__packet = None
       self.__parser = parser
       self.__path = None
@@ -91,6 +83,10 @@ class Port:
       self.__errorProcessor = errorProcessor
    
    @property
+   def isOpen(self):
+      return self.__isOpen
+   
+   @property
    def parser(self):
       return self.__parser
    
@@ -128,16 +124,19 @@ class Port:
       self.__queue.put_nowait(item)
    
    def close(self):
-      if self.isOpen():
+      if self.isOpen:
          self._close()
          self.flushWriteQueue()
+   
+   def connectionEstablished(self, port):
+      self.__isOpen = True
+   
+   def connectionLost(self, port, e):
+      self.__isOpen = False
    
    def flushWriteQueue(self):
       if self._writeQueue is not None:
          self._writeQueue.clear()
-   
-   def isOpen(self):
-      StaticUtils.notImplemented()
    
    def onPacketReceived(self, packet):
       self.processReceivedPacket(packet)
@@ -188,7 +187,7 @@ class Port:
                self.__errorProcessor(item.e)
             
             else:
-               raise UnknownItem(item)
+               self._processUnknownItem(item)
       
       except Empty:
          pass
@@ -214,7 +213,7 @@ class Port:
             
             else:
                try:
-                  if not self.isOpen():
+                  if not self.isOpen:
                      if self.__autoOpenOnWrite:
                         self._open()
                      
@@ -274,6 +273,9 @@ class Port:
       self._removeQueuedPacket(response.commandNumber, 0)
       
       self._sendNextPacket()
+   
+   def _processUnknownItem(self, item):
+      raise ValueError(item)
    
    def _removeQueuedPacket(self, commandNumber, index):
       del self._writeQueue[commandNumber][index]
