@@ -172,24 +172,23 @@ class Port:
    
    def processQueue(self):
       try:
-         item = self.__queue.get_nowait()
-         
-         if isinstance(item, ConnectionEstablished):
-            for connectionListener in self.__connectionListeners:
-               connectionListener.connectionEstablished(self)
-         
-         elif isinstance(item, ConnectionLost):
-            for connectionListener in self.__connectionListeners:
-               connectionListener.connectionLost(self, item.e)
-         
-         elif isinstance(item, DataReceived):
-            self.__parser.parse(item.data)
-         
-         elif isinstance(item, ProcessError):
-            self.__errorProcessor(item.e)
-         
-         else:
-            raise UnknownItem(item)
+         while item := self.__queue.get_nowait():
+            if isinstance(item, ConnectionEstablished):
+               for connectionListener in self.__connectionListeners:
+                  connectionListener.connectionEstablished(self)
+            
+            elif isinstance(item, ConnectionLost):
+               for connectionListener in self.__connectionListeners:
+                  connectionListener.connectionLost(self, item.e)
+            
+            elif isinstance(item, DataReceived):
+               self.__parser.parse(item.data)
+            
+            elif isinstance(item, ProcessError):
+               self.__errorProcessor(item.e)
+            
+            else:
+               raise UnknownItem(item)
       
       except Empty:
          pass

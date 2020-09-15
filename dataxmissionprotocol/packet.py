@@ -3,6 +3,7 @@ from .field import Field
 
 class Packet:
    def __init__(self, format, **kw):
+      self.__buf = None
       self.__format = format
       
       # = "cmd" can be missing, if we want to wrap() = #
