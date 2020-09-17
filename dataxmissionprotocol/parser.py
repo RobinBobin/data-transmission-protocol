@@ -19,12 +19,22 @@ class Parser:
       self.__buf = bytearray()
       self.__defaultHandler = None
       self.__defaultPacketType = defaultPacketType
+      self.__defaultParameterCount = len(signature(defaultPacketType.__init__).parameters)
       self.__format = format
       self.__handlers = {}
+      self.__trustValidity = False
    
    @property
    def format(self):
       return self.__format
+   
+   @property
+   def trustValidity(self):
+      return self.__trustValidity
+   
+   @trustValidity.setter
+   def trustValidity(self, trustValidity):
+      self.__trustValidity = trustValidity
    
    def addHandler(self, handler):
       cmd = None
@@ -55,19 +65,19 @@ class Parser:
             offset = len(self.__buf)
             break
          
-         if not self.__format.hasEnoughBytes(self.__buf, offset):
-            break
+         packetSize = self.__format.getPacketSize(self.__buf, offset, safely = True)
          
-         packetSize = self.__format.getPacketSize(self.__buf, offset)
+         if not packetSize:
+            break
          
          handler = self.__handlers.get(self.__format.getCommandNumber(self.__buf, offset))
          
          try:
             packetType = handler.packetType if handler else self.__defaultPacketType
             
-            parameterCount = len(signature(packetType.__init__).parameters)
+            parameterCount = self.__defaultParameterCount if packetType == self.__defaultPacketType else len(signature(packetType.__init__).parameters)
             
-            packet = (packetType() if parameterCount == 2 else packetType(self.__format)).wrap(self.__buf, start = offset, end = offset + packetSize)
+            packet = (packetType() if parameterCount == 2 else packetType(self.__format)).wrap(self.__buf, start = offset, end = offset + packetSize, trustValidity = self.__trustValidity)
          
          except ValueError:
             offset += 1

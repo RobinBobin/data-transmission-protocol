@@ -30,7 +30,7 @@ class BaseFormat:
    def hasEnoughBytes(self, buf, offset):
       return (len(buf) - offset) >= self._minPacketSize
    
-   def getPacketSize(self, buf, offset = 0):
+   def getPacketSize(self, buf, offset = 0, safely = False):
       raise NotImplementedError()
    
    def getCommandNumber(self, buf, offset = 0):

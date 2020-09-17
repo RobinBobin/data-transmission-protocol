@@ -36,13 +36,15 @@ class Packet:
    def __str__(self):
       return f"<{self.__class__.__name__}, {list(self.rawBuffer)}>"
    
-   def wrap(self, buffer, **kwargs):
+   def wrap(self, buffer, **kw):
       if not isinstance(buffer, bytearray):
          buffer = bytearray(buffer)
       
-      self.__buf = buffer[kwargs.get("start", 0):kwargs.get("end", len(buffer))]
-
-      if not self.__format.isValid(self.__buf):
+      self.__buf = buffer[kw.get("start", 0):kw.get("end", len(buffer))]
+      
+      isValid = kw.get("trustValidity", False) or self.__format.isValid(self.__buf)
+      
+      if not isValid:
          raise ValueError(f"{self.__buf} is not a valid packet.")
       
       return self

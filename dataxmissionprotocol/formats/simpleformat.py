@@ -28,8 +28,16 @@ class SimpleFormat(BaseFormat):
    def hasEnoughBytes(self, buf, offset):
       return super().hasEnoughBytes(buf, offset) and (len(buf) - offset) >= self.getPacketSize(buf, offset)
    
-   def getPacketSize(self, buf, offset = 0):
-      return self._getField(buf, offset, self.__size).value
+   def getPacketSize(self, buf, offset = 0, safely = False):
+      size = 0
+      
+      if not safely or super().hasEnoughBytes(buf, offset):
+         size = self._getField(buf, offset, self.__size).value
+      
+      if safely and size > (len(buf) - offset):
+         size = 0
+      
+      return size
    
    def getCommandNumber(self, buf, offset = 0):
       return self._getField(buf, offset, self.__cmd).value
