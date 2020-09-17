@@ -15,12 +15,12 @@ class Parser:
       def handler(self):
          return self.__handler
    
-   def __init__(self, format, defaultPacketType = Packet):
+   def __init__(self, fmt, defaultPacketType = Packet):
       self.__buf = bytearray()
       self.__defaultHandler = None
       self.__defaultPacketType = defaultPacketType
       self.__defaultParameterCount = len(signature(defaultPacketType.__init__).parameters)
-      self.__format = format
+      self.__format = fmt
       self.__handlers = {}
       self.__trustValidity = False
    

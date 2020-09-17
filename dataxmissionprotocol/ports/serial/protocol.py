@@ -1,6 +1,7 @@
 from serial.threaded import Protocol as ProtocolBase
 from ..queue import ConnectionLost, DataReceived
 
+# pylint: disable = attribute-defined-outside-init
 class Protocol(ProtocolBase):
    def connection_made(self, transport):
       self.__port = transport.port

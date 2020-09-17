@@ -2,9 +2,9 @@ from functools import reduce
 from .field import Field
 
 class Packet:
-   def __init__(self, format, **kw):
+   def __init__(self, fmt, **kw):
       self.__buf = None
-      self.__format = format
+      self.__format = fmt
       
       # = "cmd" can be missing, if we want to wrap() = #
       if "cmd" in kw:
@@ -14,7 +14,7 @@ class Packet:
          if list(d.values()).count(True) > 1:
             raise ValueError(f"Only one of {list(d.keys())} can be specified")
          
-         self.__buf = bytearray([0] * format.minPacketSize)
+         self.__buf = bytearray([0] * fmt.minPacketSize)
          
          def extendBuf(size):
             self.__buf.extend(bytearray([0] * size))
@@ -23,15 +23,15 @@ class Packet:
             extendBuf(kw["size"])
          
          elif paramsSpecified:
-            self.__buf[format._paramsOffset : format._paramsOffset] = kw["params"]
+            self.__buf[fmt._paramsOffset : fmt._paramsOffset] = kw["params"]
          
          elif fieldsSpecified:
             fields = kw["fields"]
             extendBuf(reduce(lambda x, y: x + y, map(lambda f: f.size, fields)))
             self.setParams(fields = fields)
          
-         format.setCommandNumber(self.__buf, kw["cmd"])
-         format.finalizePacket(self.__buf)
+         fmt.setCommandNumber(self.__buf, kw["cmd"])
+         fmt.finalizePacket(self.__buf)
    
    def __str__(self):
       return f"<{self.__class__.__name__}, {list(self.rawBuffer)}>"

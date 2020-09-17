@@ -31,7 +31,7 @@ class Field:
       self.__offset = previousField.nextOffset if previousField else offset
       self.__size = len(value) if valueIsStr else size
       
-      self.__format = f"{self.__size}s" if valueIsStr else None if signed == None else Field.__formats[self.__size][+signed]
+      self.__format = f"{self.__size}s" if valueIsStr else None if signed is None else Field.__formats[self.__size][+signed]
       
       self.__value = value.encode(Field.__encoding) if valueIsStr else value
    
@@ -57,7 +57,7 @@ class Field:
    
    @value.setter
    def value(self, value):
-      if self.__format != None:
+      if self.__format is not None:
          self.__value = value
       
       elif len(value) != self.__size:
@@ -106,7 +106,7 @@ class Field:
       i = offset + self.__offset
       j = i + self.__size
       
-      if self.__format == None:
+      if self.__format is None:
          self.__value = buf[i:j]
       
       else:
@@ -136,7 +136,7 @@ class Field:
       i = offset + self.__offset
       j = i + self.__size
       
-      if self.__format == None:
+      if self.__format is None:
          buf[i:j] = self.__value
       
       elif len(self.__format) != 2 or self.__format[0].isdigit():

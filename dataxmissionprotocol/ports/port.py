@@ -248,10 +248,15 @@ class Port(ConnectionListener):
       return Port.QueuedPacket(packet, self.__throw)
    
    def _getNextPacketToSend(self):
+      result = None
+      
       for enqueuedPackets in self._writeQueue.values():
          for enqueuedPacket in enqueuedPackets:
             if not enqueuedPacket.hasState(Port.QueuedPacket.State.SENT) and not enqueuedPacket.hasState(Port.QueuedPacket.State.RECEIVED):
-               return enqueuedPacket
+               result = enqueuedPacket
+               break
+      
+      return result
    
    def _isWriteQueueBusy(self, packet):
       return bool(self._writeQueue)
