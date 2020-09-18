@@ -1,3 +1,5 @@
+from functools import reduce
+
 class BaseFormat:
    __byteorder = {
       None: "=",
@@ -26,6 +28,9 @@ class BaseFormat:
    
    def getPacketStartIndex(self, buf, offset):
       raise NotImplementedError()
+   
+   def getStructFormat(self, fields):
+      return f"{BaseFormat.__byteorder[self.__byteorder]}{reduce(lambda x, y: x + y, map(lambda f: f.format, fields))}"
    
    def hasEnoughBytes(self, buf, offset):
       return (len(buf) - offset) >= self._minPacketSize

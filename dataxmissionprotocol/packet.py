@@ -1,4 +1,5 @@
 from functools import reduce
+from struct import unpack_from
 from .field import Field
 
 class Packet:
@@ -23,7 +24,7 @@ class Packet:
             extendBuf(kw["size"])
          
          elif paramsSpecified:
-            self.__buf[fmt._paramsOffset : fmt._paramsOffset] = kw["params"]
+            self.__buf[fmt.paramsOffset : fmt.paramsOffset] = kw["params"]
          
          elif fieldsSpecified:
             fields = kw["fields"]
@@ -35,6 +36,21 @@ class Packet:
    
    def __str__(self):
       return f"<{self.__class__.__name__}, {list(self.rawBuffer)}>"
+   
+   def getParam(self, param):
+      return self.__format.getParam(self.__buf, param)
+   
+   def getParams(self, structFormat):
+      return unpack_from(structFormat, self.__buf, self.__format.paramsOffset)
+   
+   def setParam(self, param, finalize = False):
+      self.__format.setParam(self.__buf, param, finalize)
+   
+   def setParams(self, values = None, signed = None, size = None, fields = None):
+      fields = Field.createChain(size, signed, values, fields)
+      
+      for index, field in enumerate(fields):
+         self.setParam(field, index == (len(fields) - 1))
    
    def wrap(self, buffer, **kw):
       if not isinstance(buffer, bytearray):
@@ -48,18 +64,6 @@ class Packet:
          raise ValueError(f"{self.__buf} is not a valid packet.")
       
       return self
-   
-   def getParam(self, param):
-      return self.__format.getParam(self.__buf, param)
-   
-   def setParam(self, param, finalize = False):
-      self.__format.setParam(self.__buf, param, finalize)
-   
-   def setParams(self, values = None, signed = None, size = None, fields = None):
-      fields = Field.createChain(size, signed, values, fields)
-      
-      for index, field in enumerate(fields):
-         self.setParam(field, index == (len(fields) - 1))
    
    @property
    def commandNumber(self):

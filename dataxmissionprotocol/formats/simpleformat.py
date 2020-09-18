@@ -8,13 +8,17 @@ class SimpleFormat(BaseFormat):
          # see self.getPacketStartIndex() implementation.
          raise NotImplementedError()
       
-      self._minPacketSize = marker.size + size.size + cmd.size + crc.size
+      self._minPacketSize = marker.size + size.size + cmd.size + crc.size # FIXME
       
       self.__marker = marker
       self.__size = size
       self.__cmd = cmd
-      self._paramsOffset = cmd.nextOffset
+      self.__paramsOffset = cmd.nextOffset
       self.__crc = crc
+   
+   @property
+   def paramsOffset(self):
+      return self.__paramsOffset
    
    def getMaxPacketSize(self):
       return 2 ** (self.__size.size * 8) - 1 - self.minPacketSize
@@ -43,7 +47,7 @@ class SimpleFormat(BaseFormat):
       return self._getField(buf, offset, self.__cmd).value
    
    def getParam(self, buf, param):
-      return self._getField(buf, self._paramsOffset, param)
+      return self._getField(buf, self.__paramsOffset, param)
    
    def isValid(self, buf):
       if len(buf) < self.minPacketSize or self._getField(buf, 0, self.__marker).value != self.__marker.value:
@@ -62,7 +66,7 @@ class SimpleFormat(BaseFormat):
       self._setField(buf, 0, self.__cmd)
    
    def setParam(self, buf, param, finalize = False):
-      self._setField(buf, self._paramsOffset, param)
+      self._setField(buf, self.__paramsOffset, param)
       
       if finalize:
          self.finalizePacket(buf)

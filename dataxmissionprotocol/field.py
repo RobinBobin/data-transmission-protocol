@@ -36,6 +36,10 @@ class Field:
       self.__value = value.encode(Field.__encoding) if valueIsStr else value
    
    @property
+   def format(self):
+      return self.__format
+   
+   @property
    def nextOffset(self):
       return self.__offset + self.__size
    
@@ -73,7 +77,7 @@ class Field:
       if chain:
          for i, field in enumerate(chain):
             if i:
-               field.__offset = chain[i - 1].nextOffset
+               field.offset = chain[i - 1].nextOffset
       
       else:
          chain = []
@@ -154,10 +158,29 @@ class Field:
          buf[i:j] = tmpbuf
 
 
+class StringField(Field):
+   def __init__(self, size):
+      super().__init__(value = "".join(['0'] * size))
+
+
 class UnsignedField1(Field):
    def __init__(self, size = None, **kw):
       # = The prototype was invalid, so backward compatibility... = #
       if "value" not in kw:
          kw["value"] = size
       
-      super().__init__(size = 1, signed = False, value = kw["value"])
+      kw["signed"] = False
+      kw["size"] = 1
+      
+      super().__init__(**kw)
+
+
+class UnsignedField2(Field):
+   def __init__(self, value = None, **kw):
+      kw["signed"] = False
+      kw["size"] = 2
+      
+      if value is not None:
+         kw["value"] = value
+      
+      super().__init__(**kw)

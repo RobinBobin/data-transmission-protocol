@@ -1,9 +1,9 @@
 from . import Formats
 from .simpleformat import SimpleFormat
-from ..field import Field
+from ..field import UnsignedField1, UnsignedField2
 
-marker = Field(1, signed = False, value = 0x55)
-size = Field(2, signed = False, previousField = marker)
-cmd = Field(1, signed = False, previousField = size)
+marker = UnsignedField1(0x55)
+size = UnsignedField2(previousField = marker)
+cmd = UnsignedField1(previousField = size)
 
-Formats.zx55v2 = SimpleFormat(marker, size, cmd, Field(2, signed = False))
+Formats.zx55v2 = SimpleFormat(marker, size, cmd, UnsignedField2())

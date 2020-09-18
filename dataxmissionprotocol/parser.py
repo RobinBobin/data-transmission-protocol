@@ -85,8 +85,8 @@ class Parser:
       offset = 0
       
       while True:
-         offsetAtIterationStart = offset
-         searchOffset = offsetAtIterationStart + self.__prePacketBytes
+         initialOffset = offset
+         searchOffset = initialOffset + self.__prePacketBytes
          packetFound = True # For future versions.
          
          try:
@@ -105,6 +105,7 @@ class Parser:
          chunkSize = packetSize + self.__postPacketBytes
          
          if (packetFound and not packetSize) or ((len(self.__buf) - offset) < chunkSize):
+            offset = initialOffset
             break
          
          handler = self.__handlers.get(self.__format.getCommandNumber(self.__buf, offset))
@@ -122,12 +123,12 @@ class Parser:
          else:
             handler = handler.handler if handler and handler.handler else self.__defaultHandler
             
-            postPacketBytesOffset = offsetAtIterationStart + self.__prePacketBytes + packetSize
+            postPacketBytesOffset = initialOffset + self.__prePacketBytes + packetSize
             
             chunkData = (
                packet                     \
                , self.__buf               \
-               , offsetAtIterationStart   \
+               , initialOffset            \
                , self.__prePacketBytes    \
                , postPacketBytesOffset    \
                , self.__postPacketBytes
