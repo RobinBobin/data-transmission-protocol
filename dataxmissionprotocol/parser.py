@@ -26,6 +26,7 @@ class Parser:
       self.__interPacketBytes = 0
       self.__postPacketBytes = 0
       self.__prePacketBytes = 0
+      self.__processed = 0
       self.__trustValidity = False
    
    @property
@@ -47,6 +48,10 @@ class Parser:
    @prePacketBytes.setter
    def prePacketBytes(self, prePacketBytes):
       self.__setPrePostPacketBytes(True, prePacketBytes)
+   
+   @property
+   def processed(self):
+      return self.__processed
    
    @property
    def trustValidity(self):
@@ -136,9 +141,14 @@ class Parser:
             
             offset += chunkSize
       
+      self.__processed += offset
+      
       del self.__buf[0:offset]
       
       return chunks
+   
+   def resetProcessed(self):
+      self.__processed = 0
    
    def setDefaultHandler(self, handler):
       self.__defaultHandler = handler
