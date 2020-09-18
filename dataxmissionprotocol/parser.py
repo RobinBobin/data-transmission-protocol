@@ -73,7 +73,7 @@ class Parser:
       return self
    
    def parse(self, data):
-      packets = None if self.__defaultHandler or self.__interPacketBytes else []
+      chunks = None if self.__defaultHandler else []
       
       self.__buf.extend(data)
       
@@ -115,31 +115,30 @@ class Parser:
             offset += 1
          
          else:
-            h = handler.handler if handler and handler.handler else self.__defaultHandler
+            handler = handler.handler if handler and handler.handler else self.__defaultHandler
             
-            if h:
-               if not self.__interPacketBytes:
-                  h(packet)
-               
-               else:
-                  postPacketBytesOffset = offsetAtIterationStart + self.__prePacketBytes + packetSize
-                  
-                  h(
-                     packet                     \
-                     , self.__buf               \
-                     , offsetAtIterationStart   \
-                     , self.__prePacketBytes    \
-                     , postPacketBytesOffset    \
-                     , self.__postPacketBytes)
+            postPacketBytesOffset = offsetAtIterationStart + self.__prePacketBytes + packetSize
+            
+            chunkData = (
+               packet                     \
+               , self.__buf               \
+               , offsetAtIterationStart   \
+               , self.__prePacketBytes    \
+               , postPacketBytesOffset    \
+               , self.__postPacketBytes
+            ) if self.__interPacketBytes else (packet, )
+            
+            if handler:
+               handler(*chunkData)
             
             else:
-               packets.append(packet)
+               chunks.append(chunkData)
             
             offset += chunkSize
       
       del self.__buf[0:offset]
       
-      return packets
+      return chunks
    
    def setDefaultHandler(self, handler):
       self.__defaultHandler = handler
